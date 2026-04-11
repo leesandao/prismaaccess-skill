@@ -1,0 +1,16 @@
+{
+  "name": "prisma-access-tools",
+  "owner": {
+    "name": "rali"
+  },
+  "metadata": {
+    "description": "Prisma Access configuration skills for Strata Cloud Manager"
+  },
+  "plugins": [
+    {
+      "name": "prisma-access",
+      "source": "./",
+      "description": "Prisma Access configuration management: generate, audit, migrate between tenants, troubleshoot, and automate via SCM API"
+    }
+  ]
+}

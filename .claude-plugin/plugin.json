@@ -1,0 +1,19 @@
+{
+  "name": "prisma-access",
+  "description": "Prisma Access configuration management for Strata Cloud Manager: generate, audit, migrate between tenants, troubleshoot, and automate via SCM API",
+  "version": "1.0.0",
+  "author": {
+    "name": "rali"
+  },
+  "repository": "https://github.com/rali/prismaaccess-skill",
+  "license": "MIT-0",
+  "keywords": [
+    "prisma-access",
+    "palo-alto",
+    "sase",
+    "strata-cloud-manager",
+    "scm",
+    "network-security",
+    "firewall"
+  ]
+}

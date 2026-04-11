@@ -1,0 +1,6 @@
+.git/
+.claude-plugin/
+.claude/
+*.log
+.DS_Store
+node_modules/
