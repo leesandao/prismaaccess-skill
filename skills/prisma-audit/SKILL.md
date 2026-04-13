@@ -2,11 +2,11 @@
 name: prisma-audit
 description: Audit and validate Prisma Access configurations against best practices and security standards. Use when reviewing security policies, checking for misconfigurations, or validating compliance with PAN-OS best practices and CIS benchmarks.
 argument-hint: "[config-file-or-scope]"
-version: 1.0.0
+version: 1.1.0
 metadata:
   openclaw:
     emoji: "\U0001F50D"
-    homepage: https://github.com/rali/prismaaccess-skill
+    homepage: https://github.com/leesandao/prismaaccess-skill
 ---
 
 # Prisma Access Configuration Auditor

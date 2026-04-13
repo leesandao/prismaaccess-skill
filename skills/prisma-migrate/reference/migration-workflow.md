@@ -13,7 +13,7 @@ curl -s -X POST "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token" 
   -d "scope=tsg_id:${SCM_TSG_ID}"
 ```
 
-Response provides a Bearer token valid for ~15 minutes.
+Response provides a Bearer token valid for ~15 minutes. Re-authenticate before expiry during long migrations.
 
 ## Export API Calls by Resource Type
 
@@ -26,42 +26,46 @@ Handle pagination with `offset` parameter when total exceeds limit.
 
 ### Dependency-Ordered Export Sequence
 
-| Order | Resource              | API Path                    |
-|-------|-----------------------|-----------------------------|
-| 1     | Tags                  | `/sse/config/v1/tags`       |
-| 2     | Addresses             | `/sse/config/v1/addresses`  |
-| 3     | Address Groups        | `/sse/config/v1/address-groups` |
-| 4     | Services              | `/sse/config/v1/services`   |
-| 5     | Service Groups        | `/sse/config/v1/service-groups` |
-| 6     | Application Filters   | `/sse/config/v1/application-filters` |
-| 7     | Application Groups    | `/sse/config/v1/application-groups` |
-| 8     | External Dynamic Lists| `/sse/config/v1/external-dynamic-lists` |
-| 9     | Custom URL Categories | `/sse/config/v1/custom-url-categories` |
-| 10    | URL Filtering Profiles| `/sse/config/v1/url-filtering-profiles` |
-| 11    | Antivirus Profiles    | `/sse/config/v1/anti-virus-profiles` |
-| 12    | Anti-Spyware Profiles | `/sse/config/v1/anti-spyware-profiles` |
-| 13    | Vulnerability Profiles| `/sse/config/v1/vulnerability-protection-profiles` |
-| 14    | File Blocking Profiles| `/sse/config/v1/file-blocking-profiles` |
-| 15    | Wildfire Profiles     | `/sse/config/v1/wildfire-anti-virus-profiles` |
-| 16    | Profile Groups        | `/sse/config/v1/profile-groups` |
-| 17    | Log Forwarding Profiles| `/sse/config/v1/log-forwarding-profiles` |
-| 18    | Decryption Profiles   | `/sse/config/v1/decryption-profiles` |
-| 19    | HIP Objects           | `/sse/config/v1/hip-objects` |
-| 20    | HIP Profiles          | `/sse/config/v1/hip-profiles` |
-| 21    | Security Rules (Pre)  | `/sse/config/v1/security-rules?position=pre` |
-| 22    | Security Rules (Post) | `/sse/config/v1/security-rules?position=post` |
-| 23    | NAT Rules             | `/sse/config/v1/nat-rules`  |
-| 24    | Decryption Rules      | `/sse/config/v1/decryption-rules` |
+| Order | Resource              | API Path                    | API Support |
+|-------|-----------------------|-----------------------------|-------------|
+| 1     | Tags                  | `/sse/config/v1/tags`       | Full |
+| 2     | Addresses             | `/sse/config/v1/addresses`  | Full |
+| 3     | Address Groups        | `/sse/config/v1/address-groups` | Full |
+| 4     | Services              | `/sse/config/v1/services`   | Full |
+| 5     | Service Groups        | `/sse/config/v1/service-groups` | Full |
+| 6     | Application Filters   | `/sse/config/v1/application-filters` | Full |
+| 7     | Application Groups    | `/sse/config/v1/application-groups` | Full |
+| 8     | External Dynamic Lists| `/sse/config/v1/external-dynamic-lists` | Full |
+| 9     | Custom URL Categories | `/sse/config/v1/custom-url-categories` | May return Access denied |
+| 10    | HIP Objects           | `/sse/config/v1/hip-objects` | Full |
+| 11    | HIP Profiles          | `/sse/config/v1/hip-profiles` | Full |
+| 12    | File Blocking Profiles| `/sse/config/v1/file-blocking-profiles` | Full |
+| 13    | URL Filtering Profiles| `/sse/config/v1/url-filtering-profiles` | May return Access denied |
+| 14    | Data Filtering Profiles| `/sse/config/v1/data-filtering-profiles` | May return Access denied |
+| 15    | AI Security Profiles  | `/sse/config/v1/ai-security-profiles` | May return Access denied |
+| 16    | Antivirus Profiles    | `/sse/config/v1/anti-virus-profiles` | Full |
+| 17    | Anti-Spyware Profiles | `/sse/config/v1/anti-spyware-profiles` | Full |
+| 18    | Vulnerability Profiles| `/sse/config/v1/vulnerability-protection-profiles` | Full |
+| 19    | Wildfire Profiles     | `/sse/config/v1/wildfire-anti-virus-profiles` | Full |
+| 20    | Profile Groups        | `/sse/config/v1/profile-groups` | Full (but refs may be broken) |
+| 21    | Log Forwarding Profiles| `/sse/config/v1/log-forwarding-profiles` | Full |
+| 22    | Decryption Profiles   | `/sse/config/v1/decryption-profiles` | Full |
+| 23    | Security Rules (Pre)  | `/sse/config/v1/security-rules?position=pre` | Full |
+| 24    | Security Rules (Post) | `/sse/config/v1/security-rules?position=post` | Full |
+| 25    | NAT Rules             | `/sse/config/v1/nat-rules`  | Full |
+| 26    | Decryption Rules      | `/sse/config/v1/decryption-rules` | Full |
 
 ### Folder Values
 
 Common SCM folder values:
-- `"Prisma Access"` — shared configuration
+- `"Shared"` — shared configuration (recommended for export/import)
+- `"All"` — includes system presets (read-only, don't import here)
+- `"Prisma Access"` — Prisma Access specific configuration
 - `"Mobile Users"` — GlobalProtect mobile user settings
 - `"Remote Networks"` — remote network site settings
 - `"Service Connections"` — service connection settings
-- `"Mobile Users Container"` — mobile user container
-- `"Remote Networks Container"` — remote network container
+
+**Important**: When detecting conflicts, check ALL folders, not just `Shared`. Rules in `All` or `Prisma Access` folders will cause `UNIQUEIN_ERROR` when creating in `Shared`.
 
 ## Import API Calls
 
@@ -74,6 +78,11 @@ Authorization: Bearer {token}
 {object-json-body}
 ```
 
+For security rules, add position to query parameter:
+```
+POST .../security-rules?folder=Shared&position=pre
+```
+
 ### Fields to Strip Before Import
 
 Remove these server-generated fields from exported objects before importing:
@@ -81,15 +90,42 @@ Remove these server-generated fields from exported objects before importing:
 - `created`
 - `last_modified`
 - `snippet` (if present)
+- `override_loc`
+- `override_type`
+- `override_id`
+- `rule_uuid`
+- `folder` (goes in query parameter)
+- `policy_type`
+- `position` (for rules — goes in query parameter)
+
+### Handling Profile Groups with Missing References
+
+When a Profile Group references sub-profiles that cannot be exported (URL Filtering, Data Filtering, AI Security), strip those references before import:
+
+```python
+# Example: strip unavailable references
+invalid_refs = ["SE_DLP_O365", "Block_QQ_Website", "rali-AI-Runtime-Profile"]
+for field in ["data_filtering", "ai_security", "url_filtering"]:
+    if field in profile_group:
+        remaining = [v for v in profile_group[field] if v not in invalid_refs]
+        if remaining:
+            profile_group[field] = remaining
+        else:
+            del profile_group[field]
+```
+
+The profile group will be created without those references. Add them back manually in the SCM console after creating the sub-profiles in the target tenant.
 
 ### Error Handling
 
-| HTTP Code | Meaning | Action |
-|-----------|---------|--------|
-| 400       | Invalid object | Check field values and references |
-| 409       | Object already exists | Offer skip/overwrite/rename options |
-| 429       | Rate limited | Wait and retry with exponential backoff |
-| 401/403   | Auth error | Refresh OAuth2 token |
+| HTTP Code | Error Type | Meaning | Action |
+|-----------|------------|---------|--------|
+| 400 | `INVALID_REFERENCE` | Rule references a non-existent object | Create the missing object first, then retry |
+| 400 | `Invalid Request Payload` | Nested object structure not supported | Recreate manually in SCM console |
+| 409 | `UNIQUEIN_ERROR` | Object with same name exists (any folder) | Skip — likely a system preset |
+| 409 | `OBJECT_ALREADY_EXISTS` | Object exists in another folder | Skip — check if it's in `All` or `Prisma Access` folder |
+| 429 | Rate limited | Too many requests | Wait and retry with exponential backoff |
+| 401/403 | Auth error / Access denied | Token expired or insufficient permissions | Refresh token; check Service Account role |
 
 ## Candidate Config Validation
 

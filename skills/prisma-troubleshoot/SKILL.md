@@ -2,7 +2,7 @@
 name: prisma-troubleshoot
 description: Troubleshoot Prisma Access issues including GlobalProtect connectivity, policy matching, tunnel status, SCM API errors, and configuration push failures. Use when diagnosing connection problems or configuration issues.
 argument-hint: "[issue-description]"
-version: 1.0.0
+version: 1.1.0
 metadata:
   openclaw:
     requires:
@@ -14,7 +14,7 @@ metadata:
         - curl
     primaryEnv: SCM_CLIENT_ID
     emoji: "\U0001F527"
-    homepage: https://github.com/rali/prismaaccess-skill
+    homepage: https://github.com/leesandao/prismaaccess-skill
 ---
 
 # Prisma Access Troubleshooting Guide

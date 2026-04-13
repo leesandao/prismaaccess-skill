@@ -4,7 +4,7 @@ description: Interact with the Strata Cloud Manager (SCM) API to manage Prisma A
 argument-hint: "[operation] [resource]"
 disable-model-invocation: true
 allowed-tools: Bash(curl *)
-version: 1.0.0
+version: 1.1.0
 metadata:
   openclaw:
     requires:
@@ -17,7 +17,7 @@ metadata:
         - jq
     primaryEnv: SCM_CLIENT_ID
     emoji: "\U0001F310"
-    homepage: https://github.com/rali/prismaaccess-skill
+    homepage: https://github.com/leesandao/prismaaccess-skill
 ---
 
 # Strata Cloud Manager API Operations

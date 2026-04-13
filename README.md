@@ -14,9 +14,10 @@ A set of Claude Code skills for managing Palo Alto Networks Prisma Access config
 |-------|-------------|
 | `prisma-config` | Generate SCM-compatible configurations (security policies, NAT rules, decryption, URL filtering, GlobalProtect, etc.) |
 | `prisma-audit` | Audit configurations against PAN-OS best practices, CIS benchmarks, and Zero Trust principles |
-| `prisma-migrate` | Migrate configurations between Prisma Access tenants (TSGs) |
+| `prisma-migrate` | Migrate configurations between Prisma Access tenants (TSGs) with real-world compatibility matrix |
 | `prisma-troubleshoot` | Diagnose GlobalProtect connectivity, policy matching, tunnel, and API issues |
 | `prisma-api` | Execute SCM API operations (authenticate, CRUD resources, push config) |
+| `prisma-access` | All-in-one skill combining all of the above |
 
 ### Installation
 
@@ -36,6 +37,14 @@ claude --plugin-dir /path/to/prismaaccess-skill
 ```
 
 #### ClawHub
+
+Install all-in-one:
+
+```bash
+clawhub install prisma-access
+```
+
+Or install individually:
 
 ```bash
 clawhub install prisma-config
@@ -89,6 +98,26 @@ You also need `curl` and `jq` installed.
 /prisma-access:prisma-api list security-rules
 ```
 
+### Tenant Migration Compatibility (v1.1)
+
+Based on real-world migration testing between Prisma Access tenants:
+
+#### Directly migratable via API
+
+Tags, Address Objects/Groups, Services/Groups, Application Filters/Groups, EDLs, HIP Objects/Profiles, File Blocking Profiles, Profile Groups, Security Rules (most), NAT Rules, Decryption Rules (most)
+
+#### Requires manual handling
+
+| Resource | Issue |
+|----------|-------|
+| URL Filtering / Data Filtering / AI Security Profiles | Service Account may lack API read permissions |
+| Custom URL Categories | API may return Access denied |
+| Profile Groups with inaccessible sub-profiles | Import with invalid refs stripped, fix manually later |
+| Rules referencing missing objects | Create dependencies first, then retry |
+| Cross-folder name conflicts | Skip — typically system presets already in target |
+
+See the [prisma-migrate skill](skills/prisma-migrate/SKILL.md) for the full compatibility matrix and detailed workflow.
+
 ---
 
 ## 中文
@@ -99,9 +128,10 @@ You also need `curl` and `jq` installed.
 |------|------|
 | `prisma-config` | 生成 SCM 兼容配置（安全策略、NAT 规则、解密策略、URL 过滤、GlobalProtect 等） |
 | `prisma-audit` | 根据 PAN-OS 最佳实践、CIS 基准和零信任原则审计配置 |
-| `prisma-migrate` | 在 Prisma Access 租户 (TSG) 之间迁移配置 |
+| `prisma-migrate` | 在 Prisma Access 租户 (TSG) 之间迁移配置，包含实测兼容性矩阵 |
 | `prisma-troubleshoot` | 诊断 GlobalProtect 连接、策略匹配、隧道和 API 问题 |
 | `prisma-api` | 执行 SCM API 操作（认证、增删改查资源、推送配置） |
+| `prisma-access` | 以上所有功能的一站式合集 |
 
 ### 安装方式
 
@@ -121,6 +151,14 @@ claude --plugin-dir /path/to/prismaaccess-skill
 ```
 
 #### ClawHub
+
+一次安装全部：
+
+```bash
+clawhub install prisma-access
+```
+
+或按需单独安装：
 
 ```bash
 clawhub install prisma-config
@@ -173,6 +211,26 @@ export SCM_TSG_ID="你的租户服务组ID"
 ```
 /prisma-access:prisma-api list security-rules
 ```
+
+### 租户迁移兼容性说明 (v1.1)
+
+基于 Prisma Access 租户间的实际迁移测试结果：
+
+#### 可直接通过 API 迁移
+
+Tags、地址对象/组、服务/组、应用过滤器/组、EDL、HIP 对象/配置、文件拦截配置、配置组、安全规则（大部分）、NAT 规则、解密规则（大部分）
+
+#### 需要手动处理
+
+| 资源 | 问题 |
+|------|------|
+| URL 过滤 / 数据过滤 / AI 安全配置 | Service Account 可能缺少 API 读取权限 |
+| 自定义 URL 类别 | API 可能返回 Access denied |
+| 引用不可用子配置的配置组 | 剥离无效引用后导入，之后手动补齐 |
+| 引用缺失对象的规则 | 先创建依赖对象，再重试导入规则 |
+| 跨 folder 同名冲突 | 跳过 — 通常是目标租户中已有的系统预置对象 |
+
+完整的兼容性矩阵和详细工作流程请查看 [prisma-migrate skill](skills/prisma-migrate/SKILL.md)。
 
 ---
 
